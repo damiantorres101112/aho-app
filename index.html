@@ -25,20 +25,6 @@
         @keyframes pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
         .splash-subtitle { margin-top: 15px; font-size: 0.85rem; letter-spacing: 3px; color: #aaa; text-transform: uppercase; }
 
-        /* PANTALLA DE LOGIN */
-        .login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #000; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 9998;
-            transition: opacity 0.5s ease, visibility 0.5s;
-        }
-        .login-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .login-box { border: 2px solid #fff; border-radius: 12px; padding: 30px; text-align: center; max-width: 320px; width: 90%; background: #000; }
-        .login-box h2 { font-size: 1.5rem; letter-spacing: 4px; margin-bottom: 10px; }
-        .login-box p { font-size: 0.75rem; color: #888; margin-bottom: 25px; }
-        .btn-google { background-color: #4285F4; color: #fff; border: none; padding: 12px 20px; font-weight: bold; font-size: 0.8rem; letter-spacing: 1px; border-radius: 6px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .btn-guest { background: transparent; color: #888; border: none; font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; text-decoration: underline; }
-
         /* APP PRINCIPAL */
         .app-container {
             width: 100%; max-width: 400px; border: 2px solid #fff;
@@ -48,6 +34,14 @@
         .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px dashed #444; }
         .header h1 { font-size: 1.5rem; letter-spacing: 6px; }
         .header-right { display: flex; align-items: center; gap: 8px; }
+        
+        /* BOTÓN PEQUEÑO DE FACEBOOK ARRIBA A LA DERECHA */
+        .btn-login-small {
+            background-color: #1877F2; color: #fff; border: none; border-radius: 50%;
+            width: 24px; height: 24px; font-weight: bold; font-size: 0.9rem;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        
         .balance-badge { border: 1px solid #fff; padding: 3px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
         .btn-reset { background: transparent; border: 1px solid #ff4444; color: #ff4444; font-size: 0.6rem; padding: 3px 5px; cursor: pointer; border-radius: 4px; }
 
@@ -86,21 +80,12 @@
         <div class="splash-subtitle">Control Financiero</div>
     </div>
 
-    <div class="login-overlay" id="login-overlay">
-        <div class="login-box">
-            <h2>AHO FINANZAS</h2>
-            <p>Inicia sesión para respaldar tus datos</p>
-            <button class="btn-google" onclick="loginConGoogle()">
-                CONTINUAR CON GOOGLE
-            </button>
-            <button class="btn-guest" onclick="entrarInvitado()">MODO INVITADO (OFFLINE)</button>
-        </div>
-    </div>
-
     <div class="app-container" id="app-container">
         <div class="header">
             <h1>A H O</h1>
             <div class="header-right">
+                <!-- AQUÍ ESTÁ EL BOTÓN PEQUEÑO DE FACEBOOK -->
+                <button class="btn-login-small" onclick="iniciarSesion()">f</button>
                 <div class="balance-badge" id="net-balance">$0.00</div>
                 <button class="btn-reset" onclick="resetearTodo()">BORRAR TODO</button>
             </div>
@@ -211,7 +196,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        // PROVEEDOR DE FACEBOOK RESTAURADO
+        import { getAuth, FacebookAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDjeIzOxRQuq6kd3KHwGkfVascCZcR22YQ",
@@ -224,7 +210,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+        const provider = new FacebookAuthProvider();
 
         let db = { ingresos: [], gastos: [], emAhorros: [], emGastos: [], metaAportes: [], metaGastos: [], metaTitulo: '', metaObjetivo: 100 };
 
@@ -239,18 +225,15 @@
             }, 1200);
         };
 
-        window.loginConGoogle = function() {
+        // FUNCIÓN DEL BOTÓN PEQUEÑO "f"
+        window.iniciarSesion = function() {
             signInWithPopup(auth, provider)
                 .then((result) => {
-                    document.getElementById('login-overlay').classList.add('hidden');
+                    alert("Sesión iniciada correctamente");
                 })
                 .catch((error) => {
                     alert("Error en login: " + error.message);
                 });
-        };
-
-        window.entrarInvitado = function() {
-            document.getElementById('login-overlay').classList.add('hidden');
         };
 
         window.cambiarPagina = function(num) {
@@ -284,7 +267,6 @@
             renderTodo();
         };
 
-        // FUNCIÓN PARA ELIMINAR DATOS INDIVIDUALES RESTAURADA
         window.borrarDato = function(tipo, index) {
             db[tipo].splice(index, 1);
             guardarDB();
@@ -301,7 +283,6 @@
         function sum(arr) { return arr.reduce((acc, item) => acc + item.monto, 0); }
 
         function renderTodo() {
-            // Renderizar listas con botón X para borrar
             ['ingresos', 'gastos', 'emAhorros', 'emGastos', 'metaAportes', 'metaGastos'].forEach(tipo => {
                 const ul = document.getElementById(`list-${tipo}`);
                 ul.innerHTML = '';
@@ -316,7 +297,6 @@
                 });
             });
 
-            // Cálculos Pagina 1
             const tIngresos = sum(db.ingresos);
             const tGastos = sum(db.gastos);
             const neto = tIngresos - tGastos;
@@ -332,7 +312,6 @@
                 document.getElementById('percent-pag1').textContent = `${pctPag1}% ING`;
             }
 
-            // Cálculos Pagina 2 (Emergencia con Gráfico Restaurado)
             const tEmAhorros = sum(db.emAhorros);
             const tEmGastos = sum(db.emGastos);
             const netoEm = tEmAhorros - tEmGastos;
@@ -348,7 +327,6 @@
                 document.getElementById('percent-pag2').textContent = `${pctPag2}% DISP`;
             }
 
-            // Cohete
             const tMetaAportes = sum(db.metaAportes);
             const tMetaGastos = sum(db.metaGastos);
             const metaActual = Math.max(0, tMetaAportes - tMetaGastos);
