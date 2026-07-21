@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AHO - Control Financiero</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+
+  <!-- SDKs de Firebase para Facebook Auth y Base de Datos -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', monospace; }
+    body { background-color: #050505; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .app-container { width: 100%; max-width: 420px; height: 92vh; background: #000; border: 3px solid #fff; border-radius: 20px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+    
+    #splash-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999; cursor: pointer; transition: opacity 1s, visibility 1s; }
+    #splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .splash-title { font-size: 4.5rem; font-weight: bold; letter-spacing: 10px; color: #fff; animation: pulse 1.2s infinite alternate; }
+    @keyframes pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
+
+    #login-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index: 800; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
+    .btn-fb { background: #1877f2; color: #fff; border: none; padding: 12px 20px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; font-size: 0.8rem; }
+    
+    header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #fff; background: #0a0a0a; }
+    .page { flex: 1; display: none; flex-direction: column; padding: 10px; overflow-y: auto; gap: 10px; }
+    .page.active { display: flex; }
+    .section-box { border: 1px solid #fff; padding: 8px; border-radius: 6px; background: #080808; display: flex; flex-direction: column; gap: 6px; }
+    input { background: #000; border: 1px solid #fff; color: #fff; padding: 6px; font-size: 0.75rem; width: 100%; }
+    button { background: #fff; color: #000; border: none; padding: 6px 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; }
+    
+    .item-list { list-style: none; max-height: 90px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+    .item-card { border: 1px solid #444; padding: 5px 8px; font-size: 0.75rem; display: flex; justify-content: space-between; background: #111; }
+    
+    nav { display: flex; border-top: 2px solid #fff; background: #000; }
+    nav button { flex: 1; border-radius: 0; background: #000; color: #fff; padding: 10px 2px; border-right: 1px solid #333; font-size: 0.65rem; }
+    nav button.active-tab { background: #fff; color: #000; }
+
+    .rocket-container { position: absolute; bottom: 55px; right: 10px; width: 40px; height: 50px; pointer-events: none; z-index: 50; }
+    .rocket-svg { width: 100%; height: 100%; transition: transform 0.8s ease; }
+    .launch-anim { animation: launch 0.8s ease-in-out; }
+    @keyframes launch { 0% { transform: translateY(0); } 50% { transform: translateY(-30px); } 100% { transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Entrada Animada AHO -->
+    <div id="splash-screen" onclick="closeSplash()">
+      <div class="splash-title">AHO</div>
+      <div style="font-size: 0.75rem; color: #888; margin-top: 15px;">(Toca para entrar)</div>
+    </div>
+
+    <!-- Login Facebook -->
+    <div id="login-overlay">
+      <h2>AHO FINANZAS</h2>
+      <p style="font-size: 0.7rem; color: #aaa; margin-top: 5px;">Inicia sesión para respaldar tus datos</p>
+      <button class="btn-fb" onclick="skipLogin()">Continuar con Facebook</button>
+      <button onclick="skipLogin()" style="background: transparent; color: #888; margin-top: 15px; text-decoration: underline;">Modo Invitado (Offline)</button>
+    </div>
+
+    <!-- Encabezado -->
+    <header>
+      <h1>A H O</h1>
+      <div style="font-size: 0.7rem; border: 1px solid #fff; padding: 3px 6px;">
+        Balance: <b id="balance-total">$0.00</b>
+      </div>
+    </header>
+
+    <!-- PÁGINA 1: INGRESOS Y AHORROS -->
+    <div id="page-1" class="page active">
+      <div class="section-box">
+        <h3>Tus Ingresos</h3>
+        <div style="display: flex; gap: 4px;">
+          <input type="text" id="inc-desc" placeholder="Concepto">
+          <input type="number" id="inc-amount" placeholder="Monto ($)">
+        </div>
+        <button onclick="addIncome()">+ Agregar Ingreso</button>
+        <ul class="item-list" id="income-list"></ul>
+      </div>
+
+      <div class="section-box">
+        <h3>Tus Ahorros (Metas)</h3>
+        <div style="display: flex; gap: 4px;">
+          <input type="text" id="sav-name" placeholder="Meta / Nombre">
+          <input type="number" id="sav-amount" placeholder="Monto ($)">
+        </div>
+        <button onclick="addSavings()">+ Guardar Ahorro</button>
+        <ul class="item-list" id="savings-list"></ul>
+      </div>
+    </div>
+
+    <!-- PÁGINA 2: GASTOS HABITUALES Y DE AHORRO -->
+    <div id="page-2" class="page">
+      <div class="section-box">
+        <h3>Gastos Habituales</h3>
+        <input type="text" id="exp-title" placeholder="Título del gasto">
+        <input type="text" id="exp-note" placeholder="Nota explicativa">
+        <input type="number" id="exp-amount" placeholder="Monto ($)">
+        <button onclick="addExpense('normal')">+ Registrar Gasto</button>
+        <ul class="item-list" id="expense-normal-list"></ul>
+      </div>
+
+      <div class="section-box">
+        <h3>Gastos de Ahorros</h3>
+        <input type="text" id="exp-sav-title" placeholder="Título">
+        <input type="text" id="exp-sav-note" placeholder="Nota explicativa">
+        <input type="number" id="exp-sav-amount" placeholder="Monto ($)">
+        <button onclick="addExpense('savings')">+ Gasto del Ahorro</button>
+        <ul class="item-list" id="expense-savings-list"></ul>
+      </div>
+    </div>
+
+    <!-- Cohete Animado -->
+    <div class="rocket-container">
+      <svg id="rocket" class="rocket-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M32 2L42 22V45L32 52L22 45V22L32 2Z" fill="#000" stroke="#FFF" stroke-width="2"/>
+        <path d="M22 30L12 40V48L22 44V30Z" fill="#000" stroke="#FFF" stroke-width="2"/>
+        <path d="M42 30L52 40V48L42 44V30Z" fill="#000" stroke="#FFF" stroke-width="2"/>
+        <circle cx="32" cy="20" r="4" fill="#FFF"/>
+      </svg>
+    </div>
+
+    <!-- Navegación Inferior -->
+    <nav>
+      <button id="tab-p1" class="active-tab" onclick="switchPage(1)">1. Ing / Ahorro</button>
+      <button id="tab-p2" onclick="switchPage(2)">2. Gastos</button>
+    </nav>
+
+  </div>
+
+  <script>
+    function closeSplash() {
+      document.getElementById('splash-screen').classList.add('hidden');
+    }
+    setTimeout(closeSplash, 2000);
+
+    function skipLogin() {
+      document.getElementById('login-overlay').style.display = 'none';
+    }
+
+    function switchPage(p) {
+      document.getElementById('page-1').classList.remove('active');
+      document.getElementById('page-2').classList.remove('active');
+      document.getElementById('tab-p1').classList.remove('active-tab');
+      document.getElementById('tab-p2').classList.remove('active-tab');
+
+      document.getElementById(`page-${p}`).classList.add('active');
+      document.getElementById(`tab-p${p}`).classList.add('active-tab');
+    }
+
+    function triggerRocket() {
+      const r = document.getElementById('rocket');
+      r.classList.remove('launch-anim');
+      void r.offsetWidth;
+      r.classList.add('launch-anim');
+    }
+
+    let balance = 0;
+    function updateBalance(val) {
+      balance += val;
+      document.getElementById('balance-total').innerText = `$${balance.toFixed(2)}`;
+    }
+
+    function addIncome() {
+      const desc = document.getElementById('inc-desc').value;
+      const amt = parseFloat(document.getElementById('inc-amount').value);
+      if(!desc || isNaN(amt)) return;
+
+      document.getElementById('income-list').innerHTML += `<li class="item-card"><span>${desc}</span><b>+$${amt.toFixed(2)}</b></li>`;
+      updateBalance(amt);
+      triggerRocket();
+      document.getElementById('inc-desc').value = '';
+      document.getElementById('inc-amount').value = '';
+    }
+
+    function addSavings() {
+      const name = document.getElementById('sav-name').value;
+      const amt = parseFloat(document.getElementById('sav-amount').value);
+      if(!name || isNaN(amt)) return;
+
+      document.getElementById('savings-list').innerHTML += `<li class="item-card"><span>${name}</span><b>$${amt.toFixed(2)}</b></li>`;
+      triggerRocket();
+      document.getElementById('sav-name').value = '';
+      document.getElementById('sav-amount').value = '';
+    }
+
+    function addExpense(type) {
+      const isNorm = type === 'normal';
+      const t = document.getElementById(isNorm ? 'exp-title' : 'exp-sav-title').value;
+      const n = document.getElementById(isNorm ? 'exp-note' : 'exp-sav-note').value;
+      const a = parseFloat(document.getElementById(isNorm ? 'exp-amount' : 'exp-sav-amount').value);
+
+      if(!t || isNaN(a)) return;
+
+      const listId = isNorm ? 'expense-normal-list' : 'expense-savings-list';
+      document.getElementById(listId).innerHTML += `
+        <li class="item-card">
+          <div><strong>${t}</strong><br><small style="color:#aaa">${n || '-'}</small></div>
+          <b>-$${a.toFixed(2)}</b>
+        </li>`;
+
+      updateBalance(-a);
+      triggerRocket();
+      document.getElementById(isNorm ? 'exp-title' : 'exp-sav-title').value = '';
+      document.getElementById(isNorm ? 'exp-note' : 'exp-sav-note').value = '';
+      document.getElementById(isNorm ? 'exp-amount' : 'exp-sav-amount').value = '';
+    }
+
+    // Registro Service Worker para modo offline
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+      });
+    }
+  </script>
+</body>
+</html>
