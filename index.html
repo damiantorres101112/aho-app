@@ -10,7 +10,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
         body { background-color: #000; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 5px; overflow-x: hidden; }
 
-        /* PANTALLA DE BIENVENIDA (SPLASH SCREEN) - APARECE PRIMERO */
+        /* PANTALLA DE BIENVENIDA (SPLASH SCREEN) */
         .splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000; display: flex; flex-direction: column;
@@ -25,58 +25,30 @@
         }
         @keyframes pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
 
-        .splash-subtitle { margin-top: 15px; font-size: 0.85rem; letter-spacing: 3px; color: #aaa; text-transform: uppercase; }
-
-        /* PANTALLA DE LOGIN */
-        .login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #000; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 9998;
-            transition: opacity 0.5s ease, visibility 0.5s;
-        }
-        .login-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        
-        .login-box {
-            border: 2px solid #fff; border-radius: 12px; padding: 30px;
-            text-align: center; max-width: 320px; width: 90%; background: #000;
-        }
-        .login-box h2 { font-size: 1.5rem; letter-spacing: 4px; margin-bottom: 10px; }
-        .login-box p { font-size: 0.75rem; color: #888; margin-bottom: 25px; }
-        
-        .btn-google {
-            background-color: #4285F4; color: #fff; border: none;
-            padding: 12px 20px; font-weight: bold; font-size: 0.8rem;
-            letter-spacing: 1px; border-radius: 6px; cursor: pointer;
-            width: 100%; transition: background 0.2s; display: flex;
-            align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px;
-        }
-        .btn-google:hover { background-color: #357ae8; }
-
-        .btn-guest {
-            background: transparent; color: #888; border: none;
-            font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; text-decoration: underline;
-        }
-        .btn-guest:hover { color: #fff; }
-
         /* APP PRINCIPAL */
         .app-container {
             width: 100%; max-width: 400px; border: 2px solid #fff;
             border-radius: 16px; padding: 12px; background-color: #000;
             display: flex; flex-direction: column; gap: 10px;
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-            opacity: 0; transition: opacity 0.5s ease;
         }
-        .app-container.visible { opacity: 1; }
 
-        /* HEADER */
+        /* HEADER CON BOTÓN DE GOOGLE */
         .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px dashed #444; }
         .header h1 { font-size: 1.5rem; letter-spacing: 6px; }
-        .header-right { display: flex; align-items: center; gap: 8px; }
+        .header-right { display: flex; align-items: center; gap: 6px; }
         .balance-badge { border: 1px solid #fff; padding: 3px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        
+        .btn-google-icon {
+            background: #fff; color: #000; border: none; font-weight: bold;
+            font-size: 0.75rem; border-radius: 4px; padding: 3px 6px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
         .user-avatar { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #fff; display: none; }
         .btn-reset { background: transparent; border: 1px solid #ff4444; color: #ff4444; font-size: 0.6rem; padding: 3px 5px; cursor: pointer; border-radius: 4px; }
 
-        /* PÁGINAS / TAB CONTENT */
+        /* PÁGINAS */
         .page { display: none; flex-direction: column; gap: 10px; }
         .page.active { display: flex; }
 
@@ -84,7 +56,7 @@
         .box { border: 1px solid #fff; border-radius: 8px; padding: 10px; position: relative; }
         .box-title { font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; text-align: center; color: #ccc; }
 
-        /* GRÁFICO CIRCULAR SIMPLIFICADO */
+        /* GRÁFICO CIRCULAR */
         .chart-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 120px; }
         .donut-chart {
             width: 80px; height: 80px; border-radius: 50%;
@@ -107,13 +79,12 @@
             padding: 8px; font-size: 0.75rem; font-weight: bold;
             letter-spacing: 2px; border-radius: 4px; cursor: pointer; text-transform: uppercase;
         }
-        .btn-action:active { background: #ccc; }
 
         /* LISTAS */
         .item-list { list-style: none; max-height: 80px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
         .item-list li { display: flex; justify-content: space-between; font-size: 0.75rem; padding: 4px 6px; background: #111; border-radius: 4px; border-left: 2px solid #fff; }
 
-        /* COHETE / ANIMACIÓN DE META */
+        /* COHETE */
         .rocket-container { height: 100px; display: flex; align-items: flex-end; justify-content: center; position: relative; border-bottom: 2px dashed #444; margin-bottom: 10px; }
         .rocket { font-size: 2rem; position: absolute; bottom: 0; transition: bottom 0.5s ease-out; }
 
@@ -125,32 +96,19 @@
 </head>
 <body>
 
-    <!-- 1. PANTALLA DE BIENVENIDA -->
+    <!-- PANTALLA DE BIENVENIDA -->
     <div class="splash-screen" id="splash-screen">
         <div class="splash-title">A H O</div>
-        <div class="splash-subtitle">Control Financiero</div>
     </div>
 
-    <!-- 2. PANTALLA DE LOGIN -->
-    <div class="login-overlay" id="login-overlay">
-        <div class="login-box">
-            <h2>AHO FINANZAS</h2>
-            <p>Inicia sesión para respaldar tus datos</p>
-            <button class="btn-google" onclick="loginConGoogle()">
-                <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1H12v3.33h5.37c-.24 1.22-.92 2.26-1.93 2.95v2.45h3.12c1.83-1.68 2.89-4.16 2.89-7.13c0-.52-.05-1.04-.1-1.6z"/><path fill="currentColor" d="M12 21c2.62 0 4.82-.87 6.43-2.35l-3.12-2.45c-.87.58-1.98.92-3.31.92c-2.54 0-4.69-1.72-5.46-4.03H3.31v2.53C4.92 18.8 8.21 21 12 21z"/><path fill="currentColor" d="M6.54 13.09c-.2-.58-.31-1.2-.31-1.84c0-.64.11-1.26.31-1.84V6.88H3.31A9.99 9.99 0 0 0 2 11.25c0 1.61.39 3.14 1.31 4.37l3.23-2.53z"/><path fill="currentColor" d="M12 5.38c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.81 2.41 14.62 1.5 12 1.5C8.21 1.5 4.92 3.7 3.31 6.88l3.23 2.53c.77-2.31 2.92-4.03 5.46-4.03z"/></svg>
-                CONTINUAR CON GOOGLE
-            </button>
-            <button class="btn-guest" onclick="entrarInvitado()">MODO INVITADO (OFFLINE)</button>
-        </div>
-    </div>
-
-    <!-- 3. APP PRINCIPAL -->
+    <!-- APP PRINCIPAL -->
     <div class="app-container" id="app-container">
         <!-- HEADER -->
         <div class="header">
             <h1>A H O</h1>
             <div class="header-right">
                 <div class="balance-badge" id="net-balance">$0.00</div>
+                <button class="btn-google-icon" id="btn-login-google" onclick="loginConGoogle()" title="Iniciar sesión con Google">G</button>
                 <img id="user-photo" class="user-avatar" alt="User">
                 <button class="btn-reset" onclick="resetearTodo()">RESET</button>
             </div>
@@ -254,7 +212,7 @@
             </div>
         </div>
 
-        <!-- NAVEGACIÓN -->
+        <!-- NAVEGACIÓN INFERIOR -->
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="cambiarPagina(1)">1. ING/GASTOS</button>
             <button class="tab-btn" onclick="cambiarPagina(2)">2. EMERGENCIA</button>
@@ -286,18 +244,15 @@
         };
 
         window.onload = function() {
-            // 1. Cargar datos locales
             const dataGuardada = localStorage.getItem('aho_app_db');
             if (dataGuardada) db = JSON.parse(dataGuardada);
             document.getElementById('meta-titulo').value = db.metaTitulo || '';
             document.getElementById('meta-objetivo').value = db.metaObjetivo || '';
             renderTodo();
 
-            // 2. Temporizador para Splash Screen
             setTimeout(() => {
                 document.getElementById('splash-screen').classList.add('hidden');
-                document.getElementById('app-container').classList.add('visible');
-            }, 1200);
+            }, 1000);
         };
 
         window.loginConGoogle = function() {
@@ -309,8 +264,8 @@
                         photo: result.user.photoURL
                     };
                     guardarDB();
-                    ocultarLogin();
                     actualizarUIUsuario();
+                    alert("¡Sesión iniciada como " + result.user.displayName + "!");
                 })
                 .catch((error) => {
                     console.error("Error al iniciar sesión:", error);
@@ -318,19 +273,13 @@
                 });
         };
 
-        window.entrarInvitado = function() {
-            ocultarLogin();
-        };
-
-        function ocultarLogin() {
-            document.getElementById('login-overlay').classList.add('hidden');
-        }
-
         function actualizarUIUsuario() {
             if (db.usuarioGoogle && db.usuarioGoogle.photo) {
                 const img = document.getElementById('user-photo');
+                const btnGoogle = document.getElementById('btn-login-google');
                 img.src = db.usuarioGoogle.photo;
                 img.style.display = 'block';
+                if(btnGoogle) btnGoogle.style.display = 'none';
             }
         }
 
@@ -381,7 +330,6 @@
         }
 
         function renderTodo() {
-            // Render listas
             ['ingresos', 'gastos', 'emAhorros', 'emGastos', 'metaAportes', 'metaGastos'].forEach(tipo => {
                 const ul = document.getElementById(`list-${tipo}`);
                 if (!ul) return;
@@ -393,7 +341,6 @@
                 });
             });
 
-            // Cálculos
             const totalIngresos = sum(db.ingresos);
             const totalGastos = sum(db.gastos);
             const neto = totalIngresos - totalGastos;
@@ -401,7 +348,6 @@
             document.getElementById('net-balance').textContent = `$${neto.toFixed(2)}`;
             document.getElementById('page1-title').textContent = `PAG 1: INGRESOS VS GASTOS (NETO: $${neto.toFixed(2)})`;
 
-            // Gráfico Donut
             const total = totalIngresos + totalGastos;
             const chart = document.getElementById('donut-chart');
             const percentLabel = document.getElementById('chart-percent');
@@ -415,7 +361,6 @@
                 percentLabel.textContent = `${pctIngresos}% ING`;
             }
 
-            // Cohete
             const totalMetaAportes = sum(db.metaAportes);
             const totalMetaGastos = sum(db.metaGastos);
             const metaAhorroActual = Math.max(0, totalMetaAportes - totalMetaGastos);
