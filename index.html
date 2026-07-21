@@ -1,386 +1,446 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A H O</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
-    body { background-color: #000; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 5px; overflow: hidden; }
-    
-    /* PANTALLA DE BIENVENIDA (SPLASH SCREEN) - APARECE PRIMERO */
-    .splash-screen {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background-color: #000; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; z-index: 9999;
-      transition: opacity 0.5s ease-out, visibility 0.5s;
-    }
-    .splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    
-    .splash-title {
-      font-size: 4.5rem; font-weight: bold; letter-spacing: 10px; color: #fff;
-      animation: pulse 1.2s infinite alternate; text-shadow: 0 0 15px rgba(255,255,255,0.7);
-    }
-    @keyframes pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
-    
-    .splash-sub { font-size: 0.8rem; color: #888; letter-spacing: 2px; margin-top: 10px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AHO</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
+        body { background-color: #000; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 5px; overflow-x: hidden; }
 
-    /* CONTENEDOR PRINCIPAL DE LA APP */
-    .app-container {
-      width: 100%; max-width: 420px; background-color: #000; border: 2px solid #fff;
-      border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px;
-      min-height: 650px; justify-content: space-between; position: relative;
-      box-shadow: 0 0 15px rgba(255,255,255,0.1); opacity: 0; transition: opacity 0.5s ease-in;
-    }
-    .app-container.visible { opacity: 1; }
+        /* PANTALLA DE BIENVENIDA (SPLASH SCREEN) - APARECE PRIMERO */
+        .splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 9999;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
+        .splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
 
-    /* CABECERA CON NETO TOTAL Y BOTÓN DE GOOGLE */
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; gap: 5px; }
-    .header h1 { font-size: 1.3rem; letter-spacing: 2px; }
-    .header-right { display: flex; align-items: center; gap: 6px; }
-    .neto-box { border: 1px solid #fff; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; background: #111; }
-    
-    /* BOTÓN PEQUEÑO DE GOOGLE EN LA ESQUINA */
-    .btn-google-icon { 
-      background: #ffffff; border: 1px solid #fff; border-radius: 50%; 
-      width: 28px; height: 28px; display: flex; align-items: center; 
-      justify-content: center; cursor: pointer; transition: transform 0.2s;
-    }
-    .btn-google-icon:active { transform: scale(0.9); }
-    .btn-google-icon img { width: 16px; height: 16px; }
+        .splash-title {
+            font-size: 4.5rem; font-weight: bold; letter-spacing: 10px; color: #fff;
+            animation: pulse 1.2s infinite alternate; text-shadow: 0 0 15px rgba(255,255,255,0.7);
+        }
+        @keyframes pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
 
-    .btn-reset { border: 1px solid #ff4d4d; color: #ff4d4d; background: transparent; padding: 4px 6px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; font-weight: bold; }
+        .splash-subtitle { margin-top: 15px; font-size: 0.85rem; letter-spacing: 3px; color: #aaa; text-transform: uppercase; }
 
-    /* PÁGINAS Y CAJAS */
-    .page { display: none; flex-direction: column; gap: 12px; flex-grow: 1; overflow-y: auto; }
-    .page.active { display: flex; }
-    .box { border: 1px solid #fff; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: #000; }
-    .box-title { font-size: 0.8rem; letter-spacing: 1px; color: #aaa; text-transform: uppercase; border-bottom: 1px dashed #444; padding-bottom: 4px; text-align: center; font-weight: bold; }
+        /* PANTALLA DE LOGIN */
+        .login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 9998;
+            transition: opacity 0.5s ease, visibility 0.5s;
+        }
+        .login-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        
+        .login-box {
+            border: 2px solid #fff; border-radius: 12px; padding: 30px;
+            text-align: center; max-width: 320px; width: 90%; background: #000;
+        }
+        .login-box h2 { font-size: 1.5rem; letter-spacing: 4px; margin-bottom: 10px; }
+        .login-box p { font-size: 0.75rem; color: #888; margin-bottom: 25px; }
+        
+        .btn-google {
+            background-color: #4285F4; color: #fff; border: none;
+            padding: 12px 20px; font-weight: bold; font-size: 0.8rem;
+            letter-spacing: 1px; border-radius: 6px; cursor: pointer;
+            width: 100%; transition: background 0.2s; display: flex;
+            align-items: center; justify-content: center; gap: 10px; margin-bottom: 15px;
+        }
+        .btn-google:hover { background-color: #357ae8; }
 
-    /* INPUTS Y BOTONES ACCIÓN */
-    .input-group { display: flex; gap: 5px; }
-    input { background: #000; color: #fff; border: 1px solid #fff; padding: 8px; border-radius: 4px; width: 100%; font-size: 0.85rem; outline: none; }
-    .btn-action { background: #fff; color: #000; border: none; padding: 9px; font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-guest {
+            background: transparent; color: #888; border: none;
+            font-size: 0.7rem; letter-spacing: 1px; cursor: pointer; text-decoration: underline;
+        }
+        .btn-guest:hover { color: #fff; }
 
-    /* LISTAS EDITABLES */
-    .item-list { list-style: none; display: flex; flex-direction: column; gap: 5px; padding-right: 2px; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding: 4px 0; font-size: 0.8rem; }
-    .item-actions { display: flex; gap: 6px; }
-    .btn-sm { background: transparent; border: 1px solid #fff; color: #fff; font-size: 0.65rem; padding: 2px 5px; border-radius: 3px; cursor: pointer; }
-    .btn-sm.del { border-color: #ff4d4d; color: #ff4d4d; }
+        /* APP PRINCIPAL */
+        .app-container {
+            width: 100%; max-width: 400px; border: 2px solid #fff;
+            border-radius: 16px; padding: 12px; background-color: #000;
+            display: flex; flex-direction: column; gap: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            opacity: 0; transition: opacity 0.5s ease;
+        }
+        .app-container.visible { opacity: 1; }
 
-    /* GRÁFICAS */
-    .chart-container { display: flex; justify-content: center; align-items: center; padding: 5px 0; min-height: 130px; }
-    canvas { max-width: 100%; height: 120px; }
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px dashed #444; }
+        .header h1 { font-size: 1.5rem; letter-spacing: 6px; }
+        .header-right { display: flex; align-items: center; gap: 8px; }
+        .balance-badge { border: 1px solid #fff; padding: 3px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .user-avatar { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #fff; display: none; }
+        .btn-reset { background: transparent; border: 1px solid #ff4444; color: #ff4444; font-size: 0.6rem; padding: 3px 5px; cursor: pointer; border-radius: 4px; }
 
-    /* GRÁFICA COHETE */
-    .rocket-graph-container { position: relative; width: 100%; height: 150px; border: 1px solid #fff; border-radius: 6px; overflow: hidden; background: #050505; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; }
-    .rocket-bars { display: flex; justify-content: space-around; align-items: flex-end; height: 90px; width: 100%; z-index: 1; }
-    .r-bar { width: 12%; background: repeating-linear-gradient(45deg, #fff, #fff 2px, #000 2px, #000 5px); border: 1px solid #fff; transition: height 0.3s; }
-    .rocket-ship { position: absolute; font-size: 1.8rem; transition: all 0.5s ease-out; z-index: 2; transform: rotate(25deg); }
-    .stars-bg { position: absolute; top: 10px; right: 15px; font-size: 0.7rem; color: #444; }
+        /* PÁGINAS / TAB CONTENT */
+        .page { display: none; flex-direction: column; gap: 10px; }
+        .page.active { display: flex; }
 
-    /* NAVEGACIÓN INFERIOR */
-    .nav-tabs { display: flex; border: 1px solid #fff; border-radius: 4px; overflow: hidden; background: #000; margin-top: 5px; z-index: 10; }
-    .tab-btn { flex: 1; background: #000; color: #fff; border: none; padding: 10px 2px; font-size: 0.65rem; cursor: pointer; border-right: 1px solid #fff; font-weight: bold; }
-    .tab-btn:last-child { border-right: none; }
-    .tab-btn.active { background: #fff; color: #000; }
-  </style>
+        /* BOXES */
+        .box { border: 1px solid #fff; border-radius: 8px; padding: 10px; position: relative; }
+        .box-title { font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; text-align: center; color: #ccc; }
+
+        /* GRÁFICO CIRCULAR SIMPLIFICADO */
+        .chart-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 120px; }
+        .donut-chart {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: conic-gradient(#fff 0% var(--p, 0%), #222 var(--p, 0%) 100%);
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .donut-inner { width: 60px; height: 60px; background: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #888; }
+
+        /* INPUTS Y BOTONES */
+        .input-group { display: flex; gap: 6px; margin-bottom: 8px; }
+        input[type="text"], input[type="number"] {
+            background: #000; border: 1px solid #555; color: #fff;
+            padding: 8px; font-size: 0.8rem; border-radius: 4px; outline: none; width: 100%;
+        }
+        input::placeholder { color: #555; }
+        input:focus { border-color: #fff; }
+
+        .btn-action {
+            width: 100%; background: #fff; color: #000; border: none;
+            padding: 8px; font-size: 0.75rem; font-weight: bold;
+            letter-spacing: 2px; border-radius: 4px; cursor: pointer; text-transform: uppercase;
+        }
+        .btn-action:active { background: #ccc; }
+
+        /* LISTAS */
+        .item-list { list-style: none; max-height: 80px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+        .item-list li { display: flex; justify-content: space-between; font-size: 0.75rem; padding: 4px 6px; background: #111; border-radius: 4px; border-left: 2px solid #fff; }
+
+        /* COHETE / ANIMACIÓN DE META */
+        .rocket-container { height: 100px; display: flex; align-items: flex-end; justify-content: center; position: relative; border-bottom: 2px dashed #444; margin-bottom: 10px; }
+        .rocket { font-size: 2rem; position: absolute; bottom: 0; transition: bottom 0.5s ease-out; }
+
+        /* NAVEGACIÓN INFERIOR */
+        .nav-tabs { display: flex; border: 1px solid #fff; border-radius: 8px; overflow: hidden; margin-top: 5px; }
+        .tab-btn { flex: 1; background: #000; color: #888; border: none; padding: 10px 0; font-size: 0.65rem; font-weight: bold; cursor: pointer; letter-spacing: 1px; }
+        .tab-btn.active { background: #fff; color: #000; }
+    </style>
 </head>
 <body>
 
-  <!-- PANTALLA DE BIENVENIDA (SPLASH SCREEN) -->
-  <div id="splash-screen" class="splash-screen">
-    <div class="splash-title">AHO</div>
-    <div class="splash-sub">Control Financiero Cohete</div>
-  </div>
-
-  <!-- APLICACIÓN PRINCIPAL -->
-  <div id="app-container" class="app-container">
-    <div id="main-app" style="display: flex; flex-direction: column; height: 100%; justify-content: space-between; flex-grow: 1;">
-      
-      <!-- CABECERA -->
-      <div class="header">
-        <h1>A H O</h1>
-        <div class="header-right">
-          <div class="neto-box">$<span id="lbl-neto-header">0.00</span></div>
-          <button class="btn-google-icon" title="Vincular Google" onclick="loginGoogle()">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G">
-          </button>
-          <button class="btn-reset" onclick="reiniciarDatos()">RESET</button>
-        </div>
-      </div>
-
-      <!-- PÁGINA 1 -->
-      <div id="pag-1" class="page active">
-        <div class="box">
-          <div class="box-title">PAG 1: INGRESOS vs GASTOS (NETO: $<span id="lbl-neto-p1">0.00</span>)</div>
-          <div class="chart-container"><canvas id="chart-p1"></canvas></div>
-        </div>
-        <div class="box">
-          <div class="box-title" style="text-align: left;">+ INGRESOS</div>
-          <div class="input-group"><input type="text" id="ing-concepto" placeholder="Concepto"><input type="number" id="ing-monto" placeholder="$" style="width:35%;"></div>
-          <button class="btn-action" onclick="agregarTransaccion('ingresos')">+ AGREGAR INGRESO</button>
-          <ul id="list-ingresos" class="item-list"></ul>
-        </div>
-        <div class="box">
-          <div class="box-title" style="text-align: left;">- GASTOS HABITUALES</div>
-          <div class="input-group"><input type="text" id="gas-concepto" placeholder="Título / Nota"><input type="number" id="gas-monto" placeholder="$" style="width:35%;"></div>
-          <button class="btn-action" onclick="agregarTransaccion('gastos')">+ REGISTRAR GASTO</button>
-          <ul id="list-gastos" class="item-list"></ul>
-        </div>
-      </div>
-
-      <!-- PÁGINA 2 -->
-      <div id="pag-2" class="page">
-        <div class="box">
-          <div class="box-title">PAG 2: EMERGENCIA (NETO: $<span id="lbl-neto-p2">0.00</span>)</div>
-          <div class="chart-container"><canvas id="chart-p2"></canvas></div>
-        </div>
-        <div class="box">
-          <div class="box-title" style="text-align: left;">+ AHORRO EMERGENCIA</div>
-          <div class="input-group"><input type="text" id="em-ahorro-concepto" placeholder="Nota"><input type="number" id="em-ahorro-monto" placeholder="$" style="width:35%;"></div>
-          <button class="btn-action" onclick="agregarTransaccion('emAhorros')">+ AHORRAR</button>
-          <ul id="list-emAhorros" class="item-list"></ul>
-        </div>
-        <div class="box">
-          <div class="box-title" style="text-align: left;">- GASTO EMERGENCIA</div>
-          <div class="input-group"><input type="text" id="em-gasto-concepto" placeholder="Motivo"><input type="number" id="em-gasto-monto" placeholder="$" style="width:35%;"></div>
-          <button class="btn-action" onclick="agregarTransaccion('emGastos')">+ REGISTRAR GASTO</button>
-          <ul id="list-emGastos" class="item-list"></ul>
-        </div>
-      </div>
-
-      <!-- PÁGINA 3 -->
-      <div id="pag-3" class="page">
-        <div class="box">
-          <div class="box-title">CONFIGURAR META (NETO: $<span id="lbl-neto-p3">0.00</span>)</div>
-          <div class="input-group"><input type="text" id="meta-titulo" placeholder="Meta (Ej: Viaje)" onchange="guardarMetaInfo()"><input type="number" id="meta-objetivo" placeholder="Monto ($)" onchange="guardarMetaInfo()"></div>
-        </div>
-        <div class="box">
-          <div class="box-title">TRAYECTORIA (<span id="lbl-porcentaje">0</span>%)</div>
-          <div class="rocket-graph-container">
-            <div class="stars-bg">★ ✦ 🚀 ✦ ★</div>
-            <div id="rocket-icon" class="rocket-ship" style="left: 10px; bottom: 15px;">🚀</div>
-            <div class="rocket-bars"><div class="r-bar" style="height:15%;"></div><div class="r-bar" style="height:30%;"></div><div class="r-bar" style="height:50%;"></div><div class="r-bar" style="height:70%;"></div><div class="r-bar" style="height:90%;"></div></div>
-          </div>
-        </div>
-        <div class="box">
-          <div class="box-title" style="text-align: left;">+ APORTES META</div>
-          <div class="input-group"><input type="text" id="meta-aporte-concepto" placeholder="Nota"><input type="number" id="meta-aporte-monto" placeholder="$" style="width:35%;"></div>
-          <button class="btn-action" onclick="agregarTransaccion('metaAportes')">+ APORTAR</button>
-          <ul id="list-metaAportes" class="item-list"></ul>
-        </div>
-        <div class="box">
-          <div class="box-title" style="text-align: left;">- GASTOS META</div>
-          <div class="input-group"><input type="text" id="meta-gasto-concepto" placeholder="Nota"><input type="number" id="meta-gasto-monto" placeholder="$" style="width:35%;"></div>
-          <button class="btn-action" onclick="agregarTransaccion('metaGastos')">+ REGISTRAR GASTO</button>
-          <ul id="list-metaGastos" class="item-list"></ul>
-        </div>
-      </div>
-
-      <!-- NAVEGACIÓN -->
-      <div class="nav-tabs">
-        <button class="tab-btn active" onclick="cambiarPagina(1)">1. ING/GASTOS</button>
-        <button class="tab-btn" onclick="cambiarPagina(2)">2. EMERGENCIA</button>
-        <button class="tab-btn" onclick="cambiarPagina(3)">3. META COHETE</button>
-      </div>
+    <!-- 1. PANTALLA DE BIENVENIDA -->
+    <div class="splash-screen" id="splash-screen">
+        <div class="splash-title">A H O</div>
+        <div class="splash-subtitle">Control Financiero</div>
     </div>
-  </div>
 
-<script type="module">
-  let db = { ingresos: [], gastos: [], emAhorros: [], emGastos: [], metaAportes: [], metaGastos: [], metaTitulo: '', metaObjetivo: 100, usuarioGoogle: null };
+    <!-- 2. PANTALLA DE LOGIN -->
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-box">
+            <h2>AHO FINANZAS</h2>
+            <p>Inicia sesión para respaldar tus datos</p>
+            <button class="btn-google" onclick="loginConGoogle()">
+                <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1H12v3.33h5.37c-.24 1.22-.92 2.26-1.93 2.95v2.45h3.12c1.83-1.68 2.89-4.16 2.89-7.13c0-.52-.05-1.04-.1-1.6z"/><path fill="currentColor" d="M12 21c2.62 0 4.82-.87 6.43-2.35l-3.12-2.45c-.87.58-1.98.92-3.31.92c-2.54 0-4.69-1.72-5.46-4.03H3.31v2.53C4.92 18.8 8.21 21 12 21z"/><path fill="currentColor" d="M6.54 13.09c-.2-.58-.31-1.2-.31-1.84c0-.64.11-1.26.31-1.84V6.88H3.31A9.99 9.99 0 0 0 2 11.25c0 1.61.39 3.14 1.31 4.37l3.23-2.53z"/><path fill="currentColor" d="M12 5.38c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.81 2.41 14.62 1.5 12 1.5C8.21 1.5 4.92 3.7 3.31 6.88l3.23 2.53c.77-2.31 2.92-4.03 5.46-4.03z"/></svg>
+                CONTINUAR CON GOOGLE
+            </button>
+            <button class="btn-guest" onclick="entrarInvitado()">MODO INVITADO (OFFLINE)</button>
+        </div>
+    </div>
 
-  window.onload = function() {
-    // 1. Cargar datos
-    const dataGuardada = localStorage.getItem('aho_app_db');
-    if (dataGuardada) db = JSON.parse(dataGuardada);
-    document.getElementById('meta-titulo').value = db.metaTitulo || '';
-    document.getElementById('meta-objetivo').value = db.metaObjetivo || '';
-    renderTodo();
+    <!-- 3. APP PRINCIPAL -->
+    <div class="app-container" id="app-container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>A H O</h1>
+            <div class="header-right">
+                <div class="balance-badge" id="net-balance">$0.00</div>
+                <img id="user-photo" class="user-avatar" alt="User">
+                <button class="btn-reset" onclick="resetearTodo()">RESET</button>
+            </div>
+        </div>
 
-    // 2. Temporizador de 3 segundos para la pantalla de bienvenida
-    setTimeout(() => {
-      document.getElementById('splash-screen').classList.add('hidden'); // Ocultar Splash
-      document.getElementById('app-container').classList.add('visible'); // Mostrar App
-      document.body.style.overflow = 'auto'; // Permitir scroll
-    }, 3000); // 3000 milisegundos = 3 segundos
-  };
+        <!-- PÁGINA 1: INGRESOS Y GASTOS -->
+        <div class="page active" id="page-1">
+            <div class="box">
+                <div class="box-title" id="page1-title">PAG 1: INGRESOS VS GASTOS</div>
+                <div class="chart-container">
+                    <div class="donut-chart" id="donut-chart" style="--p: 0%">
+                        <div class="donut-inner" id="chart-percent">SIN DATOS</div>
+                    </div>
+                </div>
+            </div>
 
-  function guardarLocal() { localStorage.setItem('aho_app_db', JSON.stringify(db)); renderTodo(); }
+            <div class="box">
+                <div class="box-title" style="text-align: left;">+ INGRESOS</div>
+                <div class="input-group">
+                    <input type="text" id="ingreso-concepto" placeholder="Concepto">
+                    <input type="number" id="ingreso-monto" placeholder="$" style="width: 40%;">
+                </div>
+                <button class="btn-action" onclick="agregarTransaccion('ingresos')">+ AGREGAR INGRESO</button>
+                <ul id="list-ingresos" class="item-list"></ul>
+            </div>
 
-  function loginGoogle() {
-    let email = prompt("Ingresa tu Gmail para vincular sesión (Simulación):");
-    if (email && email.includes('@')) {
-      db.usuarioGoogle = email;
-      alert("¡Sesión vinculada a: " + email + "!");
-      guardarLocal();
-    }
-  }
+            <div class="box">
+                <div class="box-title" style="text-align: left;">- GASTOS HABITUALES</div>
+                <div class="input-group">
+                    <input type="text" id="gasto-concepto" placeholder="Título / Nota">
+                    <input type="number" id="gasto-monto" placeholder="$" style="width: 40%;">
+                </div>
+                <button class="btn-action" onclick="agregarTransaccion('gastos')">+ REGISTRAR GASTO</button>
+                <ul id="list-gastos" class="item-list"></ul>
+            </div>
+        </div>
 
-  function cambiarPagina(num) {
-    document.querySelectorAll('.page').forEach((p, i) => p.classList.toggle('active', i === num - 1));
-    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === num - 1));
-    renderTodo();
-  }
+        <!-- PÁGINA 2: FONDO DE EMERGENCIA -->
+        <div class="page" id="page-2">
+            <div class="box">
+                <div class="box-title">PAG 2: FONDO DE EMERGENCIA</div>
+                <p style="font-size: 0.7rem; color: #aaa; text-align: center; margin-bottom: 10px;">Ahorro de respaldo para imprevistos</p>
+            </div>
 
-  function agregarTransaccion(tipo) {
-    let inputConcepto, inputMonto;
-    if (tipo === 'ingresos') { inputConcepto = 'ing-concepto'; inputMonto = 'ing-monto'; }
-    else if (tipo === 'gastos') { inputConcepto = 'gas-concepto'; inputMonto = 'gas-monto'; }
-    else if (tipo === 'emAhorros') { inputConcepto = 'em-ahorro-concepto'; inputMonto = 'em-ahorro-monto'; }
-    else if (tipo === 'emGastos') { inputConcepto = 'em-gasto-concepto'; inputMonto = 'em-gasto-monto'; }
-    else if (tipo === 'metaAportes') { inputConcepto = 'meta-aporte-concepto'; inputMonto = 'meta-aporte-monto'; }
-    else if (tipo === 'metaGastos') { inputConcepto = 'meta-gasto-concepto'; inputMonto = 'meta-gasto-monto'; }
+            <div class="box">
+                <div class="box-title" style="text-align: left;">+ APORTES EMERGENCIA</div>
+                <div class="input-group">
+                    <input type="text" id="em-aporte-concepto" placeholder="Nota">
+                    <input type="number" id="em-aporte-monto" placeholder="$" style="width: 40%;">
+                </div>
+                <button class="btn-action" onclick="agregarTransaccion('emAhorros')">+ APORTAR</button>
+                <ul id="list-emAhorros" class="item-list"></ul>
+            </div>
 
-    let concepto = document.getElementById(inputConcepto).value.trim() || 'Sin detalle';
-    let monto = parseFloat(document.getElementById(inputMonto).value) || 0;
+            <div class="box">
+                <div class="box-title" style="text-align: left;">- USOS DE EMERGENCIA</div>
+                <div class="input-group">
+                    <input type="text" id="em-gasto-concepto" placeholder="Motivo">
+                    <input type="number" id="em-gasto-monto" placeholder="$" style="width: 40%;">
+                </div>
+                <button class="btn-action" onclick="agregarTransaccion('emGastos')">- RETIRAR</button>
+                <ul id="list-emGastos" class="item-list"></ul>
+            </div>
+        </div>
 
-    if (monto > 0) {
-      db[tipo].push({ id: Date.now(), concepto, monto });
-      document.getElementById(inputConcepto).value = '';
-      document.getElementById(inputMonto).value = '';
-      guardarLocal();
-    }
-  }
+        <!-- PÁGINA 3: META COHETE -->
+        <div class="page" id="page-3">
+            <div class="box">
+                <div class="box-title">PAG 3: META COHETE</div>
+                <div class="input-group" style="margin-top: 5px;">
+                    <input type="text" id="meta-titulo" placeholder="Nombre de la meta" onchange="guardarMetaInfo()">
+                    <input type="number" id="meta-objetivo" placeholder="Objetivo $" style="width: 40%;" onchange="guardarMetaInfo()">
+                </div>
+            </div>
 
-  function borrarElemento(tipo, id) { db[tipo] = db[tipo].filter(item => item.id !== id); guardarLocal(); }
+            <div class="box">
+                <div class="rocket-container">
+                    <div class="rocket" id="rocket">🚀</div>
+                </div>
+                <p style="text-align: center; font-size: 0.8rem; font-weight: bold;" id="rocket-progress">0% ALCANZADO</p>
+            </div>
 
-  function editarElemento(tipo, id) {
-    let item = db[tipo].find(i => i.id === id);
-    if (item) {
-      let nC = prompt("Editar nota:", item.concepto);
-      let nM = prompt("Editar monto ($):", item.monto);
-      if (nC !== null && nM !== null) {
-        item.concepto = nC.trim() || item.concepto;
-        item.monto = parseFloat(nM) || item.monto;
-        guardarLocal();
-      }
-    }
-  }
+            <div class="box">
+                <div class="box-title" style="text-align: left;">+ APORTES META</div>
+                <div class="input-group">
+                    <input type="text" id="meta-aporte-concepto" placeholder="Nota">
+                    <input type="number" id="meta-aporte-monto" placeholder="$" style="width: 40%;">
+                </div>
+                <button class="btn-action" onclick="agregarTransaccion('metaAportes')">+ APORTAR</button>
+                <ul id="list-metaAportes" class="item-list"></ul>
+            </div>
 
-  function guardarMetaInfo() {
-    db.metaTitulo = document.getElementById('meta-titulo').value;
-    db.metaObjetivo = parseFloat(document.getElementById('meta-objetivo').value) || 100;
-    guardarLocal();
-  }
+            <div class="box">
+                <div class="box-title" style="text-align: left;">- GASTOS META</div>
+                <div class="input-group">
+                    <input type="text" id="meta-gasto-concepto" placeholder="Nota">
+                    <input type="number" id="meta-gasto-monto" placeholder="$" style="width: 40%;">
+                </div>
+                <button class="btn-action" onclick="agregarTransaccion('metaGastos')">- REGISTRAR GASTO</button>
+                <ul id="list-metaGastos" class="item-list"></ul>
+            </div>
+        </div>
 
-  function sumar(arr) { return arr.reduce((acc, i) => acc + i.monto, 0); }
+        <!-- NAVEGACIÓN -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="cambiarPagina(1)">1. ING/GASTOS</button>
+            <button class="tab-btn" onclick="cambiarPagina(2)">2. EMERGENCIA</button>
+            <button class="tab-btn" onclick="cambiarPagina(3)">3. META COHETE</button>
+        </div>
+    </div>
 
-  function renderTodo() {
-    // Listas
-    ['ingresos', 'gastos', 'emAhorros', 'emGastos', 'metaAportes', 'metaGastos'].forEach(tipo => {
-      let ul = document.getElementById('list-' + tipo);
-      if (!ul) return;
-      ul.innerHTML = '';
-      db[tipo].forEach(item => {
-        let li = document.createElement('li');
-        li.className = 'item-row';
-        li.innerHTML = `<span>${item.concepto}: <b>$${item.monto.toFixed(2)}</b></span><div class="item-actions"><button class="btn-sm" onclick="editarElemento('${tipo}', ${item.id})">EDIT</button><button class="btn-sm del" onclick="borrarElemento('${tipo}', ${item.id})">X</button></div>`;
-        ul.appendChild(li);
-      });
-    });
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // Cálculos
-    let tI = sumar(db.ingresos), tG = sumar(db.gastos), nH = tI - tG;
-    let tEA = sumar(db.emAhorros), tEG = sumar(db.emGastos), nE = tEA - tEG;
-    let tMA = sumar(db.metaAportes), tMG = sumar(db.metaGastos), nM = tMA - tMG;
-    let nGlobal = nH + nE + nM;
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjeIzOxRQuq6kd3KHwGkfVascCZcR22YQ",
+            authDomain: "aho-e2843.firebaseapp.com",
+            projectId: "aho-e2843",
+            storageBucket: "aho-e2843.firebasestorage.app",
+            messagingSenderId: "192436114090",
+            appId: "1:192436114090:web:9b7a0e51a34b2f7e3c36d3",
+            measurementId: "G-ZGK93YNLT3"
+        };
 
-    // Actualizar Labels
-    document.getElementById('lbl-neto-header').innerText = nGlobal.toFixed(2);
-    document.getElementById('lbl-neto-p1').innerText = nH.toFixed(2);
-    document.getElementById('lbl-neto-p2').innerText = nE.toFixed(2);
-    document.getElementById('lbl-neto-p3').innerText = nM.toFixed(2);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-    // Gráficas
-    drawPieChart('chart-p1', [tI, tG], ['Ingresos', 'Gastos']);
-    drawPieChart('chart-p2', [tEA, tEG], ['Fondo', 'Gastos']);
+        let db = {
+            ingresos: [], gastos: [], emAhorros: [], emGastos: [], metaAportes: [], metaGastos: [],
+            metaTitulo: '', metaObjetivo: 100, usuarioGoogle: null
+        };
 
-    // Cohete
-    let mObj = db.metaObjetivo || 100;
-    let pct = Math.min(100, Math.max(0, (nM / mObj) * 100));
-    document.getElementById('lbl-porcentaje').innerText = pct.toFixed(0);
-    let rocket = document.getElementById('rocket-icon');
-    rocket.style.left = (10 + (pct * 0.75)) + '%';
-    rocket.style.bottom = (15 + (pct * 0.95)) + 'px';
-  }
+        window.onload = function() {
+            // 1. Cargar datos locales
+            const dataGuardada = localStorage.getItem('aho_app_db');
+            if (dataGuardada) db = JSON.parse(dataGuardada);
+            document.getElementById('meta-titulo').value = db.metaTitulo || '';
+            document.getElementById('meta-objetivo').value = db.metaObjetivo || '';
+            renderTodo();
 
-  function drawPieChart(canvasId, values, labels) {
-    let canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    let ctx = canvas.getContext('2d');
-    canvas.width = 280; canvas.height = 130;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    let total = values.reduce((a, b) => a + b, 0);
-    let cx = 75, cy = 65, radius = 50;
-    if (total === 0) {
-      ctx.beginPath(); ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
-      ctx.strokeStyle = '#fff'; ctx.stroke();
-      ctx.fillStyle = '#888'; ctx.font = '10px Courier New'; ctx.fillText("SIN DATOS", cx - 25, cy + 3);
-      return;
-    }
-    let startAngle = 0;
-    let patterns = ['#ffffff', '#222222'];
-    values.forEach((val, i) => {
-      if (val <= 0) return;
-      let sliceAngle = (val / total) * 2 * Math.PI;
-      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle); ctx.closePath();
-      ctx.fillStyle = patterns[i % patterns.length]; ctx.fill();
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
-      startAngle += sliceAngle;
-    });
-    // Leyenda
-    let lx = 140, ly = 45;
-    labels.forEach((label, i) => {
-      ctx.fillStyle = patterns[i]; ctx.fillRect(lx, ly + (i * 25), 12, 12);
-      ctx.strokeStyle = '#fff'; ctx.strokeRect(lx, ly + (i * 25), 12, 12);
-      let val = values[i];
-      let pct = ((val / total) * 100).toFixed(0);
-      ctx.fillStyle = '#fff'; ctx.font = '10px Courier New'; ctx.fillText(`${label}: $${val.toFixed(0)} (${pct}%)`, lx + 18, ly + (i * 25) + 10);
-    });
-  }
+            // 2. Temporizador para Splash Screen
+            setTimeout(() => {
+                document.getElementById('splash-screen').classList.add('hidden');
+                document.getElementById('app-container').classList.add('visible');
+            }, 1200);
+        };
 
-  function reiniciarDatos() {
-    if (confirm("¿Reiniciar todo a $0.00?")) {
-      db = { ingresos: [], gastos: [], emAhorros: [], emGastos: [], metaAportes: [], metaGastos: [], metaTitulo: '', metaObjetivo: 100, usuarioGoogle: null };
-      document.getElementById('meta-titulo').value = '';
-      document.getElementById('meta-objetivo').value = '';
-      guardarLocal();
-    }
-  }
-  // --- INICIO DE SESIÓN CON FIREBASE Y GOOGLE ---
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        window.loginConGoogle = function() {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    db.usuarioGoogle = {
+                        name: result.user.displayName,
+                        email: result.user.email,
+                        photo: result.user.photoURL
+                    };
+                    guardarDB();
+                    ocultarLogin();
+                    actualizarUIUsuario();
+                })
+                .catch((error) => {
+                    console.error("Error al iniciar sesión:", error);
+                    alert("Error al iniciar sesión: " + error.message);
+                });
+        };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyDjeIzOxRQuq6kd3KHwGkfVascCZcR22YQ",
-    authDomain: "aho-e2843.firebaseapp.com",
-    projectId: "aho-e2843",
-    storageBucket: "aho-e2843.firebasestorage.app",
-    messagingSenderId: "192436114090",
-    appId: "1:192436114090:web:9b7a0e51a34b2f7e3c36d3",
-    measurementId: "G-ZGK93YNLT3"
-  };
+        window.entrarInvitado = function() {
+            ocultarLogin();
+        };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
+        function ocultarLogin() {
+            document.getElementById('login-overlay').classList.add('hidden');
+        }
 
-  window.loginConGoogle = function() {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        alert("¡Bienvenido " + result.user.displayName + "!");
-        console.log("Usuario:", result.user);
-      })
-      .catch((error) => {
-        console.error("Error al iniciar sesión:", error);
-        alert("Error al iniciar sesión: " + error.message);
-      });
-  };
-</script>
+        function actualizarUIUsuario() {
+            if (db.usuarioGoogle && db.usuarioGoogle.photo) {
+                const img = document.getElementById('user-photo');
+                img.src = db.usuarioGoogle.photo;
+                img.style.display = 'block';
+            }
+        }
+
+        window.cambiarPagina = function(num) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`page-${num}`).classList.add('active');
+            document.querySelectorAll('.tab-btn')[num - 1].classList.add('active');
+        };
+
+        window.agregarTransaccion = function(tipo) {
+            let conceptoId = '', montoId = '';
+
+            if (tipo === 'ingresos') { conceptoId = 'ingreso-concepto'; montoId = 'ingreso-monto'; }
+            else if (tipo === 'gastos') { conceptoId = 'gasto-concepto'; montoId = 'gasto-monto'; }
+            else if (tipo === 'emAhorros') { conceptoId = 'em-aporte-concepto'; montoId = 'em-aporte-monto'; }
+            else if (tipo === 'emGastos') { conceptoId = 'em-gasto-concepto'; montoId = 'em-gasto-monto'; }
+            else if (tipo === 'metaAportes') { conceptoId = 'meta-aporte-concepto'; montoId = 'meta-aporte-monto'; }
+            else if (tipo === 'metaGastos') { conceptoId = 'meta-gasto-concepto'; montoId = 'meta-gasto-monto'; }
+
+            const conceptoInput = document.getElementById(conceptoId);
+            const montoInput = document.getElementById(montoId);
+
+            const concepto = conceptoInput.value.trim() || 'Sin concepto';
+            const monto = parseFloat(montoInput.value);
+
+            if (isNaN(monto) || monto <= 0) return alert('Por favor ingresa un monto válido.');
+
+            db[tipo].push({ concepto, monto, fecha: new Date().toLocaleDateString() });
+            
+            conceptoInput.value = '';
+            montoInput.value = '';
+
+            guardarDB();
+            renderTodo();
+        };
+
+        window.guardarMetaInfo = function() {
+            db.metaTitulo = document.getElementById('meta-titulo').value;
+            db.metaObjetivo = parseFloat(document.getElementById('meta-objetivo').value) || 100;
+            guardarDB();
+            renderTodo();
+        };
+
+        function sum(arr) {
+            return arr.reduce((acc, item) => acc + item.monto, 0);
+        }
+
+        function renderTodo() {
+            // Render listas
+            ['ingresos', 'gastos', 'emAhorros', 'emGastos', 'metaAportes', 'metaGastos'].forEach(tipo => {
+                const ul = document.getElementById(`list-${tipo}`);
+                if (!ul) return;
+                ul.innerHTML = '';
+                db[tipo].forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${item.concepto}</span> <strong>$${item.monto.toFixed(2)}</strong>`;
+                    ul.appendChild(li);
+                });
+            });
+
+            // Cálculos
+            const totalIngresos = sum(db.ingresos);
+            const totalGastos = sum(db.gastos);
+            const neto = totalIngresos - totalGastos;
+
+            document.getElementById('net-balance').textContent = `$${neto.toFixed(2)}`;
+            document.getElementById('page1-title').textContent = `PAG 1: INGRESOS VS GASTOS (NETO: $${neto.toFixed(2)})`;
+
+            // Gráfico Donut
+            const total = totalIngresos + totalGastos;
+            const chart = document.getElementById('donut-chart');
+            const percentLabel = document.getElementById('chart-percent');
+
+            if (total === 0) {
+                chart.style.setProperty('--p', '0%');
+                percentLabel.textContent = 'SIN DATOS';
+            } else {
+                const pctIngresos = Math.round((totalIngresos / total) * 100);
+                chart.style.setProperty('--p', `${pctIngresos}%`);
+                percentLabel.textContent = `${pctIngresos}% ING`;
+            }
+
+            // Cohete
+            const totalMetaAportes = sum(db.metaAportes);
+            const totalMetaGastos = sum(db.metaGastos);
+            const metaAhorroActual = Math.max(0, totalMetaAportes - totalMetaGastos);
+            const metaObj = db.metaObjetivo || 100;
+            const pctMeta = Math.min(100, Math.round((metaAhorroActual / metaObj) * 100));
+
+            document.getElementById('rocket').style.bottom = `${pctMeta}%`;
+            document.getElementById('rocket-progress').textContent = `${pctMeta}% ALCANZADO`;
+
+            actualizarUIUsuario();
+        }
+
+        function guardarDB() {
+            localStorage.setItem('aho_app_db', JSON.stringify(db));
+        }
+
+        window.resetearTodo = function() {
+            if (confirm('¿Seguro que deseas borrar todos los datos?')) {
+                localStorage.removeItem('aho_app_db');
+                db = { ingresos: [], gastos: [], emAhorros: [], emGastos: [], metaAportes: [], metaGastos: [], metaTitulo: '', metaObjetivo: 100, usuarioGoogle: null };
+                document.getElementById('meta-titulo').value = '';
+                document.getElementById('meta-objetivo').value = '';
+                renderTodo();
+            }
+        };
+    </script>
 </body>
 </html>
-
