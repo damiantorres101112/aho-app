@@ -351,6 +351,36 @@
       guardarLocal();
     }
   }
+  // --- INICIO DE SESIÓN CON FIREBASE Y GOOGLE ---
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDjeIzOxRQuq6kd3KHwGkfVascCZcR22YQ",
+    authDomain: "aho-e2843.firebaseapp.com",
+    projectId: "aho-e2843",
+    storageBucket: "aho-e2843.firebasestorage.app",
+    messagingSenderId: "192436114090",
+    appId: "1:192436114090:web:9b7a0e51a34b2f7e3c36d3",
+    measurementId: "G-ZGK93YNLT3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  window.loginConGoogle = function() {
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        alert("¡Bienvenido " + result.user.displayName + "!");
+        console.log("Usuario:", result.user);
+      })
+      .catch((error) => {
+        console.error("Error al iniciar sesión:", error);
+        alert("Error al iniciar sesión: " + error.message);
+      });
+  };
 </script>
 </body>
 </html>
+
