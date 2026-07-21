@@ -35,9 +35,10 @@
         .header h1 { font-size: 1.5rem; letter-spacing: 6px; }
         .header-right { display: flex; align-items: center; gap: 8px; }
         
-        /* BOTÓN PEQUEÑO DE FACEBOOK ARRIBA A LA DERECHA */
+        /* BOTÓN PEQUEÑO DE GOOGLE ARRIBA A LA DERECHA */
         .btn-login-small {
-            background-color: #1877F2; color: #fff; border: none; border-radius: 50%;
+            background-color: #EA4335; /* Rojo de Google */
+            color: #fff; border: none; border-radius: 50%;
             width: 24px; height: 24px; font-weight: bold; font-size: 0.9rem;
             cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
@@ -84,8 +85,8 @@
         <div class="header">
             <h1>A H O</h1>
             <div class="header-right">
-                <!-- AQUÍ ESTÁ EL BOTÓN PEQUEÑO DE FACEBOOK -->
-                <button class="btn-login-small" onclick="iniciarSesion()">f</button>
+                <!-- AQUÍ ESTÁ EL BOTÓN PEQUEÑO DE GOOGLE -->
+                <button class="btn-login-small" onclick="iniciarSesion()">G</button>
                 <div class="balance-badge" id="net-balance">$0.00</div>
                 <button class="btn-reset" onclick="resetearTodo()">BORRAR TODO</button>
             </div>
@@ -196,8 +197,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        // PROVEEDOR DE FACEBOOK RESTAURADO
-        import { getAuth, FacebookAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        // IMPORTACIÓN CORRECTA DE GOOGLE AUTH
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDjeIzOxRQuq6kd3KHwGkfVascCZcR22YQ",
@@ -210,7 +211,8 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const provider = new FacebookAuthProvider();
+        // PROVEEDOR DE GOOGLE CONFIGURADO
+        const provider = new GoogleAuthProvider();
 
         let db = { ingresos: [], gastos: [], emAhorros: [], emGastos: [], metaAportes: [], metaGastos: [], metaTitulo: '', metaObjetivo: 100 };
 
@@ -225,11 +227,11 @@
             }, 1200);
         };
 
-        // FUNCIÓN DEL BOTÓN PEQUEÑO "f"
+        // FUNCIÓN DEL BOTÓN PEQUEÑO "G"
         window.iniciarSesion = function() {
             signInWithPopup(auth, provider)
                 .then((result) => {
-                    alert("Sesión iniciada correctamente");
+                    alert("Sesión iniciada correctamente con Google");
                 })
                 .catch((error) => {
                     alert("Error en login: " + error.message);
