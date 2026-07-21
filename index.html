@@ -8,239 +8,216 @@
   <meta name="theme-color" content="#000000">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace; }
-    body { background-color: #000; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 5px; }
+    body { background-color: #000; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 5px; overflow: hidden; }
     
+    /* PANTALLA DE BIENVENIDA (SPLASH SCREEN) - APARECE PRIMERO */
+    .splash-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: #000; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; z-index: 9999;
+      transition: opacity 0.5s ease-out, visibility 0.5s;
+    }
+    .splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    
+    .splash-title {
+      font-size: 4.5rem; font-weight: bold; letter-spacing: 10px; color: #fff;
+      animation: pulse 1.2s infinite alternate; text-shadow: 0 0 15px rgba(255,255,255,0.7);
+    }
+    @keyframes pulse { from { opacity: 0.5; transform: scale(0.95); } to { opacity: 1; transform: scale(1.05); } }
+    
+    .splash-sub { font-size: 0.8rem; color: #888; letter-spacing: 2px; margin-top: 10px; }
+
+    /* CONTENEDOR PRINCIPAL DE LA APP */
     .app-container {
       width: 100%; max-width: 420px; background-color: #000; border: 2px solid #fff;
       border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px;
-      min-height: 650px; justify-content: space-between; position: relative; box-shadow: 0 0 15px rgba(255,255,255,0.1);
+      min-height: 650px; justify-content: space-between; position: relative;
+      box-shadow: 0 0 15px rgba(255,255,255,0.1); opacity: 0; transition: opacity 0.5s ease-in;
     }
+    .app-container.visible { opacity: 1; }
 
-    /* PANTALLA LOGIN */
-    .login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; flex-grow: 1; text-align: center; gap: 20px; padding: 30px 10px; }
-    .login-title { font-size: 2.2rem; letter-spacing: 6px; font-weight: bold; }
-    .btn-fb { background-color: #1877f2; color: #fff; border: none; padding: 14px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-family: sans-serif; font-size: 0.95rem; }
-    .btn-guest { background-color: transparent; color: #fff; border: 1px solid #fff; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 0.85rem; letter-spacing: 1px; }
+    /* CABECERA CON NETO TOTAL Y BOTÓN DE GOOGLE */
+    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; gap: 5px; }
+    .header h1 { font-size: 1.3rem; letter-spacing: 2px; }
+    .header-right { display: flex; align-items: center; gap: 6px; }
+    .neto-box { border: 1px solid #fff; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; background: #111; }
+    
+    /* BOTÓN PEQUEÑO DE GOOGLE EN LA ESQUINA */
+    .btn-google-icon { 
+      background: #ffffff; border: 1px solid #fff; border-radius: 50%; 
+      width: 28px; height: 28px; display: flex; align-items: center; 
+      justify-content: center; cursor: pointer; transition: transform 0.2s;
+    }
+    .btn-google-icon:active { transform: scale(0.9); }
+    .btn-google-icon img { width: 16px; height: 16px; }
 
-    /* CABECERA CON NETO TOTAL */
-    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 8px; }
-    .header h1 { font-size: 1.4rem; letter-spacing: 3px; }
-    .neto-box { border: 1px solid #fff; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; background: #111; }
-    .btn-reset { border: 1px solid #ff4d4d; color: #ff4d4d; background: transparent; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
+    .btn-reset { border: 1px solid #ff4d4d; color: #ff4d4d; background: transparent; padding: 4px 6px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; font-weight: bold; }
 
-    /* PÁGINAS */
-    .page { display: none; flex-direction: column; gap: 12px; flex-grow: 1; }
+    /* PÁGINAS Y CAJAS */
+    .page { display: none; flex-direction: column; gap: 12px; flex-grow: 1; overflow-y: auto; }
     .page.active { display: flex; }
-
     .box { border: 1px solid #fff; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: #000; }
     .box-title { font-size: 0.8rem; letter-spacing: 1px; color: #aaa; text-transform: uppercase; border-bottom: 1px dashed #444; padding-bottom: 4px; text-align: center; font-weight: bold; }
 
-    /* INPUTS Y BOTONES */
+    /* INPUTS Y BOTONES ACCIÓN */
     .input-group { display: flex; gap: 5px; }
     input { background: #000; color: #fff; border: 1px solid #fff; padding: 8px; border-radius: 4px; width: 100%; font-size: 0.85rem; outline: none; }
-    input:focus { border-color: #888; }
     .btn-action { background: #fff; color: #000; border: none; padding: 9px; font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
-    .btn-action:active { background: #ccc; }
 
-    /* LISTAS EDITABLES CON BOTONES DE BORRAR Y EDITAR */
-    .item-list { list-style: none; display: flex; flex-direction: column; gap: 5px; max-height: 110px; overflow-y: auto; padding-right: 2px; }
+    /* LISTAS EDITABLES */
+    .item-list { list-style: none; display: flex; flex-direction: column; gap: 5px; padding-right: 2px; }
     .item-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding: 4px 0; font-size: 0.8rem; }
     .item-actions { display: flex; gap: 6px; }
     .btn-sm { background: transparent; border: 1px solid #fff; color: #fff; font-size: 0.65rem; padding: 2px 5px; border-radius: 3px; cursor: pointer; }
     .btn-sm.del { border-color: #ff4d4d; color: #ff4d4d; }
 
-    /* CANVAS Y GRÁFICAS */
-    .chart-container { display: flex; justify-content: center; align-items: center; padding: 5px 0; min-height: 150px; }
-    canvas { max-width: 100%; height: 140px; }
+    /* GRÁFICAS */
+    .chart-container { display: flex; justify-content: center; align-items: center; padding: 5px 0; min-height: 130px; }
+    canvas { max-width: 100%; height: 120px; }
 
-    /* GRÁFICA DE COHETE (PÁGINA 3) */
-    .rocket-graph-container { position: relative; width: 100%; height: 160px; border: 1px solid #fff; border-radius: 6px; overflow: hidden; background: #050505; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; }
-    .rocket-bars { display: flex; justify-content: space-around; align-items: flex-end; height: 100px; width: 100%; z-index: 1; }
+    /* GRÁFICA COHETE */
+    .rocket-graph-container { position: relative; width: 100%; height: 150px; border: 1px solid #fff; border-radius: 6px; overflow: hidden; background: #050505; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; }
+    .rocket-bars { display: flex; justify-content: space-around; align-items: flex-end; height: 90px; width: 100%; z-index: 1; }
     .r-bar { width: 12%; background: repeating-linear-gradient(45deg, #fff, #fff 2px, #000 2px, #000 5px); border: 1px solid #fff; transition: height 0.3s; }
-    .rocket-ship { position: absolute; font-size: 1.8rem; transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); z-index: 2; transform: rotate(25deg); filter: drop-shadow(0px 0px 4px #fff); }
-    .stars-bg { position: absolute; top: 10px; right: 15px; font-size: 0.7rem; color: #666; letter-spacing: 2px; }
+    .rocket-ship { position: absolute; font-size: 1.8rem; transition: all 0.5s ease-out; z-index: 2; transform: rotate(25deg); }
+    .stars-bg { position: absolute; top: 10px; right: 15px; font-size: 0.7rem; color: #444; }
 
     /* NAVEGACIÓN INFERIOR */
-    .nav-tabs { display: flex; border: 1px solid #fff; border-radius: 4px; overflow: hidden; background: #000; margin-top: 5px; }
-    .tab-btn { flex: 1; background: #000; color: #fff; border: none; padding: 10px 2px; font-size: 0.68rem; cursor: pointer; border-right: 1px solid #fff; font-weight: bold; }
+    .nav-tabs { display: flex; border: 1px solid #fff; border-radius: 4px; overflow: hidden; background: #000; margin-top: 5px; z-index: 10; }
+    .tab-btn { flex: 1; background: #000; color: #fff; border: none; padding: 10px 2px; font-size: 0.65rem; cursor: pointer; border-right: 1px solid #fff; font-weight: bold; }
     .tab-btn:last-child { border-right: none; }
     .tab-btn.active { background: #fff; color: #000; }
   </style>
 </head>
 <body>
 
-<div class="app-container">
-
-  <!-- PANTALLA LOGIN FACEBOOK -->
-  <div id="login-screen" class="login-screen">
-    <div class="login-title">A H O</div>
-    <p style="font-size: 0.8rem; color: #aaa;">Vincula con Facebook para respaldar tu información</p>
-    <button class="btn-fb" onclick="loginFacebook()">INICIAR SESIÓN CON FACEBOOK</button>
-    <button class="btn-guest" onclick="enterApp('Invitado')">CONTINUAR MODO OFFLINE</button>
+  <!-- PANTALLA DE BIENVENIDA (SPLASH SCREEN) -->
+  <div id="splash-screen" class="splash-screen">
+    <div class="splash-title">AHO</div>
+    <div class="splash-sub">Control Financiero Cohete</div>
   </div>
 
   <!-- APLICACIÓN PRINCIPAL -->
-  <div id="main-app" style="display: none; flex-direction: column; height: 100%; justify-content: space-between; flex-grow: 1;">
-    
-    <!-- ENCABEZADO SUPERIOR CON INGRESO NETO DISPONIBLE -->
-    <div class="header">
-      <h1>A H O</h1>
-      <div class="neto-box">Neto Total: $<span id="lbl-neto-header">0.00</span></div>
-      <button class="btn-reset" onclick="reiniciarDatos()">REINICIAR</button>
-    </div>
-
-    <!-- PÁGINA 1: INGRESOS Y GASTOS HABITUALES -->
-    <div id="pag-1" class="page active">
-      <div class="box">
-        <div class="box-title">PAG 1: INGRESOS vs GASTOS (NETO: $<span id="lbl-neto-p1">0.00</span>)</div>
-        <div class="chart-container">
-          <canvas id="chart-p1"></canvas>
+  <div id="app-container" class="app-container">
+    <div id="main-app" style="display: flex; flex-direction: column; height: 100%; justify-content: space-between; flex-grow: 1;">
+      
+      <!-- CABECERA -->
+      <div class="header">
+        <h1>A H O</h1>
+        <div class="header-right">
+          <div class="neto-box">$<span id="lbl-neto-header">0.00</span></div>
+          <button class="btn-google-icon" title="Vincular Google" onclick="loginGoogle()">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="G">
+          </button>
+          <button class="btn-reset" onclick="reiniciarDatos()">RESET</button>
         </div>
       </div>
 
-      <div class="box">
-        <div class="box-title" style="text-align: left;">+ INGRESOS</div>
-        <div class="input-group">
-          <input type="text" id="ing-concepto" placeholder="Concepto">
-          <input type="number" id="ing-monto" placeholder="$" style="width: 35%;">
+      <!-- PÁGINA 1 -->
+      <div id="pag-1" class="page active">
+        <div class="box">
+          <div class="box-title">PAG 1: INGRESOS vs GASTOS (NETO: $<span id="lbl-neto-p1">0.00</span>)</div>
+          <div class="chart-container"><canvas id="chart-p1"></canvas></div>
         </div>
-        <button class="btn-action" onclick="agregarTransaccion('ingresos')">+ AGREGAR INGRESO</button>
-        <ul id="list-ingresos" class="item-list"></ul>
-      </div>
-
-      <div class="box">
-        <div class="box-title" style="text-align: left;">- GASTOS HABITUALES</div>
-        <div class="input-group">
-          <input type="text" id="gas-concepto" placeholder="Título / Nota">
-          <input type="number" id="gas-monto" placeholder="$" style="width: 35%;">
+        <div class="box">
+          <div class="box-title" style="text-align: left;">+ INGRESOS</div>
+          <div class="input-group"><input type="text" id="ing-concepto" placeholder="Concepto"><input type="number" id="ing-monto" placeholder="$" style="width:35%;"></div>
+          <button class="btn-action" onclick="agregarTransaccion('ingresos')">+ AGREGAR INGRESO</button>
+          <ul id="list-ingresos" class="item-list"></ul>
         </div>
-        <button class="btn-action" onclick="agregarTransaccion('gastos')">+ REGISTRAR GASTO</button>
-        <ul id="list-gastos" class="item-list"></ul>
-      </div>
-    </div>
-
-    <!-- PÁGINA 2: AHORROS DE EMERGENCIA -->
-    <div id="pag-2" class="page">
-      <div class="box">
-        <div class="box-title">PAG 2: FONDO DE EMERGENCIA (NETO: $<span id="lbl-neto-p2">0.00</span>)</div>
-        <div class="chart-container">
-          <canvas id="chart-p2"></canvas>
+        <div class="box">
+          <div class="box-title" style="text-align: left;">- GASTOS HABITUALES</div>
+          <div class="input-group"><input type="text" id="gas-concepto" placeholder="Título / Nota"><input type="number" id="gas-monto" placeholder="$" style="width:35%;"></div>
+          <button class="btn-action" onclick="agregarTransaccion('gastos')">+ REGISTRAR GASTO</button>
+          <ul id="list-gastos" class="item-list"></ul>
         </div>
       </div>
 
-      <div class="box">
-        <div class="box-title" style="text-align: left;">+ AHORRO DE EMERGENCIA</div>
-        <div class="input-group">
-          <input type="text" id="em-ahorro-concepto" placeholder="Depósito / Nota">
-          <input type="number" id="em-ahorro-monto" placeholder="$" style="width: 35%;">
+      <!-- PÁGINA 2 -->
+      <div id="pag-2" class="page">
+        <div class="box">
+          <div class="box-title">PAG 2: EMERGENCIA (NETO: $<span id="lbl-neto-p2">0.00</span>)</div>
+          <div class="chart-container"><canvas id="chart-p2"></canvas></div>
         </div>
-        <button class="btn-action" onclick="agregarTransaccion('emAhorros')">+ AHORRAR PARA EMERGENCIA</button>
-        <ul id="list-emAhorros" class="item-list"></ul>
-      </div>
-
-      <div class="box">
-        <div class="box-title" style="text-align: left;">- GASTOS DE EMERGENCIA</div>
-        <div class="input-group">
-          <input type="text" id="em-gasto-concepto" placeholder="Motivo de emergencia">
-          <input type="number" id="em-gasto-monto" placeholder="$" style="width: 35%;">
+        <div class="box">
+          <div class="box-title" style="text-align: left;">+ AHORRO EMERGENCIA</div>
+          <div class="input-group"><input type="text" id="em-ahorro-concepto" placeholder="Nota"><input type="number" id="em-ahorro-monto" placeholder="$" style="width:35%;"></div>
+          <button class="btn-action" onclick="agregarTransaccion('emAhorros')">+ AHORRAR</button>
+          <ul id="list-emAhorros" class="item-list"></ul>
         </div>
-        <button class="btn-action" onclick="agregarTransaccion('emGastos')">+ REGISTRAR GASTO EMERGENCIA</button>
-        <ul id="list-emGastos" class="item-list"></ul>
-      </div>
-    </div>
-
-    <!-- PÁGINA 3: AHORROS PROGRAMADOS (META COHETE) -->
-    <div id="pag-3" class="page">
-      <div class="box">
-        <div class="box-title">CONFIGURAR META PROGRAMADA (NETO: $<span id="lbl-neto-p3">0.00</span>)</div>
-        <div class="input-group">
-          <input type="text" id="meta-titulo" placeholder="Meta (Ej: Viaje)" onchange="guardarMetaInfo()">
-          <input type="number" id="meta-objetivo" placeholder="Monto Meta ($)" onchange="guardarMetaInfo()">
+        <div class="box">
+          <div class="box-title" style="text-align: left;">- GASTO EMERGENCIA</div>
+          <div class="input-group"><input type="text" id="em-gasto-concepto" placeholder="Motivo"><input type="number" id="em-gasto-monto" placeholder="$" style="width:35%;"></div>
+          <button class="btn-action" onclick="agregarTransaccion('emGastos')">+ REGISTRAR GASTO</button>
+          <ul id="list-emGastos" class="item-list"></ul>
         </div>
       </div>
 
-      <div class="box">
-        <div class="box-title">TRAYECTORIA HACIA LA META (<span id="lbl-porcentaje">0</span>%)</div>
-        <div class="rocket-graph-container">
-          <div class="stars-bg">★ ✦ 🚀 ✦ ★</div>
-          <div id="rocket-icon" class="rocket-ship" style="left: 10px; bottom: 15px;">🚀</div>
-          <div class="rocket-bars">
-            <div class="r-bar" style="height: 15%;"></div>
-            <div class="r-bar" style="height: 30%;"></div>
-            <div class="r-bar" style="height: 50%;"></div>
-            <div class="r-bar" style="height: 70%;"></div>
-            <div class="r-bar" style="height: 90%;"></div>
+      <!-- PÁGINA 3 -->
+      <div id="pag-3" class="page">
+        <div class="box">
+          <div class="box-title">CONFIGURAR META (NETO: $<span id="lbl-neto-p3">0.00</span>)</div>
+          <div class="input-group"><input type="text" id="meta-titulo" placeholder="Meta (Ej: Viaje)" onchange="guardarMetaInfo()"><input type="number" id="meta-objetivo" placeholder="Monto ($)" onchange="guardarMetaInfo()"></div>
+        </div>
+        <div class="box">
+          <div class="box-title">TRAYECTORIA (<span id="lbl-porcentaje">0</span>%)</div>
+          <div class="rocket-graph-container">
+            <div class="stars-bg">★ ✦ 🚀 ✦ ★</div>
+            <div id="rocket-icon" class="rocket-ship" style="left: 10px; bottom: 15px;">🚀</div>
+            <div class="rocket-bars"><div class="r-bar" style="height:15%;"></div><div class="r-bar" style="height:30%;"></div><div class="r-bar" style="height:50%;"></div><div class="r-bar" style="height:70%;"></div><div class="r-bar" style="height:90%;"></div></div>
           </div>
         </div>
+        <div class="box">
+          <div class="box-title" style="text-align: left;">+ APORTES META</div>
+          <div class="input-group"><input type="text" id="meta-aporte-concepto" placeholder="Nota"><input type="number" id="meta-aporte-monto" placeholder="$" style="width:35%;"></div>
+          <button class="btn-action" onclick="agregarTransaccion('metaAportes')">+ APORTAR</button>
+          <ul id="list-metaAportes" class="item-list"></ul>
+        </div>
+        <div class="box">
+          <div class="box-title" style="text-align: left;">- GASTOS META</div>
+          <div class="input-group"><input type="text" id="meta-gasto-concepto" placeholder="Nota"><input type="number" id="meta-gasto-monto" placeholder="$" style="width:35%;"></div>
+          <button class="btn-action" onclick="agregarTransaccion('metaGastos')">+ REGISTRAR GASTO</button>
+          <ul id="list-metaGastos" class="item-list"></ul>
+        </div>
       </div>
 
-      <div class="box">
-        <div class="box-title" style="text-align: left;">+ APORTES A LA META</div>
-        <div class="input-group">
-          <input type="text" id="meta-aporte-concepto" placeholder="Nota del aporte">
-          <input type="number" id="meta-aporte-monto" placeholder="$" style="width: 35%;">
-        </div>
-        <button class="btn-action" onclick="agregarTransaccion('metaAportes')">+ APORTAR A LA META</button>
-        <ul id="list-metaAportes" class="item-list"></ul>
-      </div>
-
-      <div class="box">
-        <div class="box-title" style="text-align: left;">- GASTOS DE LA META</div>
-        <div class="input-group">
-          <input type="text" id="meta-gasto-concepto" placeholder="Nota del gasto">
-          <input type="number" id="meta-gasto-monto" placeholder="$" style="width: 35%;">
-        </div>
-        <button class="btn-action" onclick="agregarTransaccion('metaGastos')">+ REGISTRAR GASTO META</button>
-        <ul id="list-metaGastos" class="item-list"></ul>
+      <!-- NAVEGACIÓN -->
+      <div class="nav-tabs">
+        <button class="tab-btn active" onclick="cambiarPagina(1)">1. ING/GASTOS</button>
+        <button class="tab-btn" onclick="cambiarPagina(2)">2. EMERGENCIA</button>
+        <button class="tab-btn" onclick="cambiarPagina(3)">3. META COHETE</button>
       </div>
     </div>
-
-    <!-- PESTAÑAS INFERIORES -->
-    <div class="nav-tabs">
-      <button class="tab-btn active" onclick="cambiarPagina(1)">1. ING/GASTOS</button>
-      <button class="tab-btn" onclick="cambiarPagina(2)">2. EMERGENCIAS</button>
-      <button class="tab-btn" onclick="cambiarPagina(3)">3. META COHETE</button>
-    </div>
-
   </div>
-</div>
 
 <script>
-  let db = {
-    ingresos: [],
-    gastos: [],
-    emAhorros: [],
-    emGastos: [],
-    metaAportes: [],
-    metaGastos: [],
-    metaTitulo: '',
-    metaObjetivo: 100
-  };
+  let db = { ingresos: [], gastos: [], emAhorros: [], emGastos: [], metaAportes: [], metaGastos: [], metaTitulo: '', metaObjetivo: 100, usuarioGoogle: null };
 
   window.onload = function() {
+    // 1. Cargar datos
     const dataGuardada = localStorage.getItem('aho_app_db');
-    if (dataGuardada) {
-      db = JSON.parse(dataGuardada);
-    }
+    if (dataGuardada) db = JSON.parse(dataGuardada);
     document.getElementById('meta-titulo').value = db.metaTitulo || '';
     document.getElementById('meta-objetivo').value = db.metaObjetivo || '';
     renderTodo();
+
+    // 2. Temporizador de 3 segundos para la pantalla de bienvenida
+    setTimeout(() => {
+      document.getElementById('splash-screen').classList.add('hidden'); // Ocultar Splash
+      document.getElementById('app-container').classList.add('visible'); // Mostrar App
+      document.body.style.overflow = 'auto'; // Permitir scroll
+    }, 3000); // 3000 milisegundos = 3 segundos
   };
 
-  function guardarLocal() {
-    localStorage.setItem('aho_app_db', JSON.stringify(db));
-    renderTodo();
-  }
+  function guardarLocal() { localStorage.setItem('aho_app_db', JSON.stringify(db)); renderTodo(); }
 
-  function loginFacebook() {
-    alert("Sesión iniciada con Facebook con éxito. Tus datos están sincronizados.");
-    enterApp('Usuario Facebook');
-  }
-
-  function enterApp(mode) {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'flex';
-    renderTodo();
+  function loginGoogle() {
+    let email = prompt("Ingresa tu Gmail para vincular sesión (Simulación):");
+    if (email && email.includes('@')) {
+      db.usuarioGoogle = email;
+      alert("¡Sesión vinculada a: " + email + "!");
+      guardarLocal();
+    }
   }
 
   function cambiarPagina(num) {
@@ -269,19 +246,16 @@
     }
   }
 
-  function borrarElemento(tipo, id) {
-    db[tipo] = db[tipo].filter(item => item.id !== id);
-    guardarLocal();
-  }
+  function borrarElemento(tipo, id) { db[tipo] = db[tipo].filter(item => item.id !== id); guardarLocal(); }
 
   function editarElemento(tipo, id) {
     let item = db[tipo].find(i => i.id === id);
     if (item) {
-      let nuevoConcepto = prompt("Editar concepto / nota:", item.concepto);
-      let nuevoMonto = prompt("Editar monto ($):", item.monto);
-      if (nuevoConcepto !== null && nuevoMonto !== null) {
-        item.concepto = nuevoConcepto.trim() || item.concepto;
-        item.monto = parseFloat(nuevoMonto) || item.monto;
+      let nC = prompt("Editar nota:", item.concepto);
+      let nM = prompt("Editar monto ($):", item.monto);
+      if (nC !== null && nM !== null) {
+        item.concepto = nC.trim() || item.concepto;
+        item.monto = parseFloat(nM) || item.monto;
         guardarLocal();
       }
     }
@@ -296,7 +270,7 @@
   function sumar(arr) { return arr.reduce((acc, i) => acc + i.monto, 0); }
 
   function renderTodo() {
-    // Renderear Listas Editables
+    // Listas
     ['ingresos', 'gastos', 'emAhorros', 'emGastos', 'metaAportes', 'metaGastos'].forEach(tipo => {
       let ul = document.getElementById('list-' + tipo);
       if (!ul) return;
@@ -304,113 +278,74 @@
       db[tipo].forEach(item => {
         let li = document.createElement('li');
         li.className = 'item-row';
-        li.innerHTML = `
-          <span>${item.concepto}: <b>$${item.monto.toFixed(2)}</b></span>
-          <div class="item-actions">
-            <button class="btn-sm" onclick="editarElemento('${tipo}', ${item.id})">EDITAR</button>
-            <button class="btn-sm del" onclick="borrarElemento('${tipo}', ${item.id})">X</button>
-          </div>
-        `;
+        li.innerHTML = `<span>${item.concepto}: <b>$${item.monto.toFixed(2)}</b></span><div class="item-actions"><button class="btn-sm" onclick="editarElemento('${tipo}', ${item.id})">EDIT</button><button class="btn-sm del" onclick="borrarElemento('${tipo}', ${item.id})">X</button></div>`;
         ul.appendChild(li);
       });
     });
 
-    // Cálculos de Totales y Netos
-    let totalIngresos = sumar(db.ingresos);
-    let totalGastos = sumar(db.gastos);
-    let netoHabitual = totalIngresos - totalGastos;
+    // Cálculos
+    let tI = sumar(db.ingresos), tG = sumar(db.gastos), nH = tI - tG;
+    let tEA = sumar(db.emAhorros), tEG = sumar(db.emGastos), nE = tEA - tEG;
+    let tMA = sumar(db.metaAportes), tMG = sumar(db.metaGastos), nM = tMA - tMG;
+    let nGlobal = nH + nE + nM;
 
-    let totalEmAhorros = sumar(db.emAhorros);
-    let totalEmGastos = sumar(db.emGastos);
-    let netoEmergencias = totalEmAhorros - totalEmGastos;
+    // Actualizar Labels
+    document.getElementById('lbl-neto-header').innerText = nGlobal.toFixed(2);
+    document.getElementById('lbl-neto-p1').innerText = nH.toFixed(2);
+    document.getElementById('lbl-neto-p2').innerText = nE.toFixed(2);
+    document.getElementById('lbl-neto-p3').innerText = nM.toFixed(2);
 
-    let totalMetaAportes = sumar(db.metaAportes);
-    let totalMetaGastos = sumar(db.metaGastos);
-    let netoMeta = totalMetaAportes - totalMetaGastos;
+    // Gráficas
+    drawPieChart('chart-p1', [tI, tG], ['Ingresos', 'Gastos']);
+    drawPieChart('chart-p2', [tEA, tEG], ['Fondo', 'Gastos']);
 
-    let netoGlobal = netoHabitual + netoEmergencias + netoMeta;
-
-    // Actualizar Encabezados
-    document.getElementById('lbl-neto-header').innerText = netoGlobal.toFixed(2);
-    document.getElementById('lbl-neto-p1').innerText = netoHabitual.toFixed(2);
-    document.getElementById('lbl-neto-p2').innerText = netoEmergencias.toFixed(2);
-    document.getElementById('lbl-neto-p3').innerText = netoMeta.toFixed(2);
-
-    // Render Gráficas Canvas
-    drawPieChart('chart-p1', [totalIngresos, totalGastos], ['Ingresos', 'Gastos']);
-    drawPieChart('chart-p2', [totalEmAhorros, totalEmGastos], ['Fondo', 'Gastos']);
-
-    // Animación Gráfica del Cohete (Página 3)
-    let metaTarget = db.metaObjetivo || 100;
-    let pct = Math.min(100, Math.max(0, (netoMeta / metaTarget) * 100));
+    // Cohete
+    let mObj = db.metaObjetivo || 100;
+    let pct = Math.min(100, Math.max(0, (nM / mObj) * 100));
     document.getElementById('lbl-porcentaje').innerText = pct.toFixed(0);
-
     let rocket = document.getElementById('rocket-icon');
-    let leftPos = 10 + (pct * 0.75); // Desplazamiento horizontal hacia la meta
-    let bottomPos = 15 + (pct * 0.95); // Desplazamiento vertical ascendente
-    rocket.style.left = leftPos + '%';
-    rocket.style.bottom = bottomPos + 'px';
+    rocket.style.left = (10 + (pct * 0.75)) + '%';
+    rocket.style.bottom = (15 + (pct * 0.95)) + 'px';
   }
 
-  // DIBUJO DE GRÁFICA DE PASTEL EN CANVA BLANCO Y NEGRO RETRO CON PATRONES
   function drawPieChart(canvasId, values, labels) {
     let canvas = document.getElementById(canvasId);
     if (!canvas) return;
     let ctx = canvas.getContext('2d');
-    canvas.width = 280; canvas.height = 140;
+    canvas.width = 280; canvas.height = 130;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     let total = values.reduce((a, b) => a + b, 0);
-    let cx = 80, cy = 70, radius = 55;
-
+    let cx = 75, cy = 65, radius = 50;
     if (total === 0) {
       ctx.beginPath(); ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.stroke();
-      ctx.fillStyle = '#888'; ctx.font = '10px Courier New';
-      ctx.fillText("SIN DATOS", cx - 25, cy + 3);
+      ctx.strokeStyle = '#fff'; ctx.stroke();
+      ctx.fillStyle = '#888'; ctx.font = '10px Courier New'; ctx.fillText("SIN DATOS", cx - 25, cy + 3);
       return;
     }
-
     let startAngle = 0;
     let patterns = ['#ffffff', '#222222'];
-
     values.forEach((val, i) => {
       if (val <= 0) return;
       let sliceAngle = (val / total) * 2 * Math.PI;
-
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle);
-      ctx.closePath();
-
-      ctx.fillStyle = patterns[i % patterns.length];
-      ctx.fill();
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle); ctx.closePath();
+      ctx.fillStyle = patterns[i % patterns.length]; ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
       startAngle += sliceAngle;
     });
-
-    // Leyenda lateral
-    let lx = 150, ly = 50;
+    // Leyenda
+    let lx = 140, ly = 45;
     labels.forEach((label, i) => {
-      ctx.fillStyle = patterns[i];
-      ctx.fillRect(lx, ly + (i * 25), 12, 12);
-      ctx.strokeStyle = '#fff';
-      ctx.strokeRect(lx, ly + (i * 25), 12, 12);
-
+      ctx.fillStyle = patterns[i]; ctx.fillRect(lx, ly + (i * 25), 12, 12);
+      ctx.strokeStyle = '#fff'; ctx.strokeRect(lx, ly + (i * 25), 12, 12);
       let val = values[i];
       let pct = ((val / total) * 100).toFixed(0);
-      ctx.fillStyle = '#fff';
-      ctx.font = '10px Courier New';
-      ctx.fillText(`${label}: $${val.toFixed(0)} (${pct}%)`, lx + 18, ly + (i * 25) + 10);
+      ctx.fillStyle = '#fff'; ctx.font = '10px Courier New'; ctx.fillText(`${label}: $${val.toFixed(0)} (${pct}%)`, lx + 18, ly + (i * 25) + 10);
     });
   }
 
   function reiniciarDatos() {
-    if (confirm("¿Seguro que deseas reiniciar todos los valores y vaciar los registros a $0.00?")) {
-      db = { ingresos: [], gastos: [], emAhorros: [], emGastos: [], metaAportes: [], metaGastos: [], metaTitulo: '', metaObjetivo: 100 };
+    if (confirm("¿Reiniciar todo a $0.00?")) {
+      db = { ingresos: [], gastos: [], emAhorros: [], emGastos: [], metaAportes: [], metaGastos: [], metaTitulo: '', metaObjetivo: 100, usuarioGoogle: null };
       document.getElementById('meta-titulo').value = '';
       document.getElementById('meta-objetivo').value = '';
       guardarLocal();
